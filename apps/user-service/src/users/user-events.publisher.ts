@@ -21,6 +21,4 @@ export class UserEventsPublisher {
 
     this.logger.log(`User created event published for userId: ${userId}`)
   }
-
-  ʼ
 }

@@ -16,6 +16,7 @@ export const RABBITMQ_SERVICE = "RABBITMQ_SERVICE"
           transport: Transport.RMQ,
           options: {
             urls: [configService.get<string>("rabbitmq.url")],
+            queue: configService.get<string>("rabbitmq.userQueue"),
           },
         }),
       },
