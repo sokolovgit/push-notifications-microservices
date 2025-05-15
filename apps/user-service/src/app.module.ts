@@ -1,9 +1,13 @@
+import * as path from "path"
+import config from "./config"
+
 import { Module } from "@nestjs/common"
+import { TypeOrmModule } from "@nestjs/typeorm"
+import { RabbitMQModule } from "./rabbitmq/rabbitmq.module"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 
-import config from "./config"
-import { TypeOrmModule } from "@nestjs/typeorm"
-import path from "path"
+import { UsersDomainModule } from "./database/domains/users/users.domain-module"
+import { UsersModule } from "./domains/users/users.module"
 
 @Module({
   imports: [
@@ -27,6 +31,11 @@ import path from "path"
         synchronize: false,
       }),
     }),
+
+    RabbitMQModule,
+
+    UsersDomainModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],
