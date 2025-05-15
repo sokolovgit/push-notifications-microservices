@@ -6,7 +6,7 @@ const path = require("path")
 const fs = require("fs")
 
 const projectWorkingDirectory = path.resolve(__dirname, "..")
-const ormconfigPath = path.resolve(projectWorkingDirectory, "ormconfig.ts")
+const dataSourcePath = path.resolve(projectWorkingDirectory, "data-source.ts")
 const migrationsPath = path.resolve(
   projectWorkingDirectory,
   "src/database/migrations",
@@ -37,7 +37,7 @@ if (migrationExists(migrationName)) {
   console.log(`Migration with the name "${migrationName}" already exists.`)
 } else {
   $(
-    `pnpm ts-node ./node_modules/typeorm/cli.js migration:generate ./src/database/migrations/${migrationName} -d ${ormconfigPath} -p`,
+    `pnpm ts-node ./node_modules/typeorm/cli.js migration:generate ./src/database/migrations/${migrationName} -d ${dataSourcePath} -p`,
   )
   $("pnpm db:migration:format")
 }
