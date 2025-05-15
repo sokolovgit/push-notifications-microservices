@@ -1,0 +1,62 @@
+services:
+  # user-service:
+  #   build:
+  #     context: ./apps/user-service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DATABASE_URL=postgres://user:password@db:5432/users
+  #     - RABBITMQ_URL=amqp://rabbitmq:5672
+  #   depends_on:
+  #     - db
+  #     - rabbitmq
+  #   networks:
+  #     - app-network
+
+  # notification-service:
+  #   build:
+  #     context: ./notification-service
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - RABBITMQ_URL=amqp://rabbitmq:5672
+  #     - REDIS_URL=redis://redis:6379
+  #   depends_on:
+  #     - rabbitmq
+  #     - redis
+  #   networks:
+  #     - app-network
+
+  db-user-service:
+    image: postgres
+    container_name: db-user-service
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=user_service_password
+      - POSTGRES_USER=user_service_user
+      - POSTGRES_DB=user-service
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+
+#   redis:
+#     image: redis:7
+#     ports:
+#       - "6379:6379"
+
+
+
+volumes:
+  pgdata:
+  pgadmin_data:
