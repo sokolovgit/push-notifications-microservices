@@ -1,4 +1,4 @@
-import { UsersRepository } from "@/database/domains/users/users.repository"
+import { UsersRepository } from "@/database/users/users.repository"
 import { Injectable } from "@nestjs/common"
 import { UserEventsPublisher } from "./user-events.publisher"
 

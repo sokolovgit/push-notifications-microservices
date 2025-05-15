@@ -6,8 +6,8 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { RabbitMQModule } from "./rabbitmq/rabbitmq.module"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 
-import { UsersDomainModule } from "./database/domains/users/users.domain-module"
-import { UsersModule } from "./domains/users/users.module"
+import { UsersDomainModule } from "./database/users/users.domain-module"
+import { UsersModule } from "./users/users.module"
 
 @Module({
   imports: [
@@ -22,9 +22,7 @@ import { UsersModule } from "./domains/users/users.module"
       useFactory: (configService: ConfigService) => ({
         type: "postgres",
         url: configService.get("database.url"),
-        entities: [
-          path.resolve(__dirname, "database/domains/**/*.entity.{js,ts}"),
-        ],
+        entities: [path.resolve(__dirname, "database/**/*.entity.{js,ts}")],
         migrations: [path.resolve(__dirname, "database/migrations/*.{js,ts}")],
         migrationsRun: false,
         logging: configService.get("database.logging"),

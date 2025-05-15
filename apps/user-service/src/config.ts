@@ -3,7 +3,7 @@ export default () => ({
 
   docs: {
     enabled: process.env.DOCS_ENABLED === "true" || false,
-    path: process.env.DOCS_PATH,
+    path: process.env.DOCS_PATH || "docs",
   },
 
   database: {
