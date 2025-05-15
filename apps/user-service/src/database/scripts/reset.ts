@@ -1,0 +1,23 @@
+import { createDatabase, dropDatabase, runSeeders } from "typeorm-extension"
+import dataSource, { config } from "../../../data-source"
+;(async () => {
+  await dropDatabase({
+    options: config,
+    initialDatabase: "postgres",
+  })
+  await createDatabase({
+    options: config,
+    initialDatabase: "postgres",
+  })
+
+  await dataSource.initialize()
+  await dataSource.runMigrations({
+    transaction: "all",
+  })
+  await runSeeders(dataSource, { seedTracking: true })
+
+  await dataSource.destroy()
+})().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error("Error creating database:", error)
+})
