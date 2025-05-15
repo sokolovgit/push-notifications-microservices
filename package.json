@@ -1,0 +1,16 @@
+{
+  "name": "push-notifications-microservices",
+  "version": "1.0.0",
+  "description": "Test task for Push Notifications Microservices",
+  "scripts": {},
+  "keywords": [],
+  "author": "Oleksandr Sokolov",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.9.0",
+  "devDependencies": {
+    "@eslint/js": "^9.26.0",
+    "eslint": "^9.26.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
+  }
+}
