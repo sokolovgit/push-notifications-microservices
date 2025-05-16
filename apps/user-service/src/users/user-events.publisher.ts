@@ -1,6 +1,7 @@
 import { RABBITMQ_SERVICE } from "@/rabbitmq/rabbitmq.module"
 import { Inject, Injectable, Logger } from "@nestjs/common"
 import { ClientProxy } from "@nestjs/microservices"
+import { UserEvents } from "./users.events-definition"
 
 @Injectable()
 export class UserEventsPublisher {
@@ -9,16 +10,10 @@ export class UserEventsPublisher {
     private readonly client: ClientProxy,
   ) {}
 
-  logger = new Logger(UserEventsPublisher.name)
-
   publishUserCreatedEvent(userId: string, firstName: string) {
-    this.logger.log(`Publishing user created event for userId: ${userId}`)
-
-    this.client.emit("user.created", {
+    this.client.emit(UserEvents.USER_CREATED, {
       id: userId,
       firstName,
     })
-
-    this.logger.log(`User created event published for userId: ${userId}`)
   }
 }
