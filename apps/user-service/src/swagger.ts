@@ -1,5 +1,5 @@
 import { ConfigService } from "@nestjs/config"
-import { INestApplication, Logger } from "@nestjs/common"
+import { INestApplication } from "@nestjs/common"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 
 export const createDocument = (app: INestApplication) => {
