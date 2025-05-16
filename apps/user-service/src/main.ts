@@ -20,9 +20,16 @@ async function bootstrap() {
     createDocument(app)
   }
 
-  await app.listen(port, "0.0.0.0")
+  await app.listen(port)
 
-  logger.log(`🚀 Application is running on: http://localhost:${port}`)
+  const appUrl = await app.getUrl()
+
+  logger.log(`🚀 Application is running on: ${appUrl}`)
+
+  if (isDocsEnabled) {
+    const docsPath = config.get<string>("docs.path")
+    logger.log(`📚 API Docs are available at: ${appUrl}/${docsPath}`)
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
