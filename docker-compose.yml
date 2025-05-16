@@ -1,31 +1,4 @@
 services:
-  # user-service:
-  #   build:
-  #     context: ./apps/user-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - DATABASE_URL=postgres://user:password@db:5432/users
-  #     - RABBITMQ_URL=amqp://rabbitmq:5672
-  #   depends_on:
-  #     - db
-  #     - rabbitmq
-  #   networks:
-  #     - app-network
-
-  # notification-service:
-  #   build:
-  #     context: ./notification-service
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - RABBITMQ_URL=amqp://rabbitmq:5672
-  #     - REDIS_URL=redis://redis:6379
-  #   depends_on:
-  #     - rabbitmq
-  #     - redis
-  #   networks:
-  #     - app-network
 
   db-user-service:
     image: postgres
@@ -59,7 +32,20 @@ services:
       volumes:
         - redis_data:/data
 
-
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+    ports:
+      - '5050:80'
+    depends_on:
+      - db-user-service
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+  
 
 volumes:
   pgdata:
