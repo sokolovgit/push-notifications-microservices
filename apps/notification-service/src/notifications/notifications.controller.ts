@@ -1,13 +1,14 @@
 import { Controller } from "@nestjs/common"
 import { EventPattern, Payload } from "@nestjs/microservices"
+import { CreatedUserDto } from "./dtos/created-user.dto"
+import { NotificationsService } from "./notifications.service"
 
 @Controller()
 export class NotificationsListener {
-  constructor() {}
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @EventPattern("user.created")
-  handleUserCreated(@Payload() data: { id: string; username: string }) {
-    // eslint-disable-next-line no-console
-    console.log(`Received user.created: ${JSON.stringify(data)}`)
+  async handleUserCreated(@Payload() data: CreatedUserDto) {
+    await this.notificationsService.createDelayedUserCreatedNotification(data)
   }
 }
