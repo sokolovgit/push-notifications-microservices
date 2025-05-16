@@ -11,12 +11,12 @@ export class UserEventsPublisher {
 
   logger = new Logger(UserEventsPublisher.name)
 
-  publishUserCreatedEvent(userId: string, username: string) {
+  publishUserCreatedEvent(userId: string, firstName: string) {
     this.logger.log(`Publishing user created event for userId: ${userId}`)
 
     this.client.emit("user.created", {
       id: userId,
-      username,
+      firstName,
     })
 
     this.logger.log(`User created event published for userId: ${userId}`)
