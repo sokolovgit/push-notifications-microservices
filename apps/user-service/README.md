@@ -1,73 +1,102 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Сервіс користувачів
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+`user-service` — це мікросервіс на базі NestJS, який відповідає за створення користувачів та публікацію подій створення користувачів у RabbitMQ. Він взаємодіє з базою даних PostgreSQL для зберігання даних користувачів і є частиною системи мікросервісів для Push-сповіщень.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Функціонал
 
-## Description
+- **Створення користувачів**: Надає HTTP POST ендпоінт для створення користувачів з полем `firstName`.
+- **Публікація подій**: Публікує події створення користувачів у RabbitMQ для асинхронної взаємодії з `notification-service`.
+- **Інтеграція з базою даних**: Зберігає дані користувачів (ім'я) у PostgreSQL за допомогою TypeORM.
+- **Документація API**: Надає Swagger-документацію для доступних ендпоінтів.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Архітектура
 
-## Installation
+`user-service` розроблено для:
+- Обробки HTTP-запитів на створення користувачів.
+- Збереження даних користувачів у PostgreSQL.
+- Відправки подій у RabbitMQ, забезпечуючи слабке зв’язування з іншими мікросервісами.
 
-```bash
-$ pnpm install
+Сервіс не залежить напряму від `notification-service`, використовуючи RabbitMQ для обміну повідомленнями.
+
+## Встановлення
+
+1. **Перейдіть до директорії сервісу**:
+  ```sh
+  cd apps/user-service
+  ```
+2. **Встановіть залежності**:
+  ```sh
+  pnpm install
+  ```
+3. **Налаштуйте змінні середовища**:
+  Створіть файл `.env` у директорії `apps/user-service` з наступним вмістом:
+  ```env
+  PORT=3000
+
+  DOCS_ENABLED=true
+  DOCS_PATH=docs
+
+  DATABASE_URL=postgresql://username:password@host:5432/name?schema=public
+  DATABASE_LOGGING=true
+
+  RABBITMQ_URL=amqp://guest:guest@host:5672
+  RABBITMQ_USER_QUEUE=user
+  ```
+  Замініть `username`, `password`, `host` та `name` на ваші дані для PostgreSQL і RabbitMQ.
+
+4. **Запустіть міграції бази даних**:
+  ```sh
+  pnpm run db:migration:run
+  ```
+
+5. **Запустіть сервіс**:
+  ```sh
+  pnpm run dev
+  ```
+  Сервіс буде доступний за адресою http://localhost:3000.
+
+## Використання
+
+### Створення користувача
+
+Виконайте POST-запит на ендпоінт створення користувача:
+
+- **Ендпоінт**: `http://localhost:3000/users`
+- **Тіло запиту**:
+  ```json
+  {
+   "firstName": "John"
+  }
+  ```
+- **Відповідь**:
+  ```json
+  {
+   "id": "cf8c7662-b726-46e3-b877-3d25381d3954",
+   "firstName": "John"
+  }
+  ```
+
+Ця дія:
+- Зберігає користувача в базі даних PostgreSQL.
+- Публікує подію створення користувача в чергу `user` у RabbitMQ.
+
+## Документація API
+
+Swagger-документація доступна за адресою: [http://localhost:3000/docs](http://localhost:3000/docs) (docs – ENV змінна, яка була встановлена вище).
+
+## Інтеграція з Docker
+
+`user-service` працює в межах Docker Compose, визначеного в корені монорепозиторію. Переконайтеся, що наступні сервіси запущені через `docker-compose.yml` у кореневій директорії:
+
+- PostgreSQL
+- RabbitMQ
+
+Запустіть інфраструктуру з кореня проєкту:
+```sh
+docker-compose up -d
 ```
 
-## Running the app
+## Вирішення проблем
 
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- **Проблеми з підключенням до бази даних**: Перевірте, чи `DATABASE_URL` у `.env` відповідає налаштуванням PostgreSQL.
+- **Проблеми з підключенням до RabbitMQ**: Переконайтеся, що `RABBITMQ_URL` правильний і RabbitMQ запущений.

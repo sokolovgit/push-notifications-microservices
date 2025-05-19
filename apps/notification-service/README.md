@@ -1,73 +1,93 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Сервіс сповіщень
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+`notification-service` — це мікросервіс на базі NestJS, який відповідає за прослуховування подій створення користувачів у RabbitMQ та планування відправки Push-сповіщень через 24 години після створення користувача. Він використовує BullMQ для обробки відкладених завдань і симулює Push-сповіщення шляхом відправки запитів на вебхук-сервіс.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Функціонал
 
-## Description
+- **Прослуховування подій**: Споживає події створення користувачів з RabbitMQ.
+- **Відкладені сповіщення**: Планує відправку Push-сповіщень через 24 години після створення користувача за допомогою BullMQ.
+- **Симуляція Push**: Відправляє симульовані Push-сповіщення на вебхук-сервіс (використовується [webhook.site](https://webhook.site/)).
+- **Моніторинг**: Надає BullBoard для моніторингу черг завдань.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Архітектура
 
-## Installation
+`notification-service` працює наступним чином:
 
-```bash
-$ pnpm install
+- Прослуховує чергу `user` у RabbitMQ на нові події створення користувачів.
+- Після отримання події планує завдання в BullMQ на виконання через 24 години.
+- Коли завдання виконується, відправляє POST-запит на налаштовану URL вебхуку для симуляції відправки Push-сповіщення.
+
+Цей дизайн забезпечує слабке зв’язування з `user-service`, використовуючи RabbitMQ для асинхронного обміну повідомленнями.
+
+## Встановлення
+
+1. **Перейдіть до директорії сервісу**:
+
+   ```sh
+   cd apps/notification-service
+   ```
+
+2. **Встановіть залежності**:
+
+   ```sh
+   pnpm install
+   ```
+
+3. **Налаштуйте змінні середовища**:
+   Створіть файл `.env` у директорії `apps/notification-service` з наступним вмістом:
+
+   ```env
+   PORT=3001
+
+
+   RABBITMQ_URL=amqp://guest:guest@host:port
+   RABBITMQ_USER_QUEUE=user
+
+
+   WEBHOOK_UNIQUE_URL=https://webhook.site/id
+
+
+   REDIS_HOST=host
+   REDIS_PORT=6379
+
+
+   BULLBOARD_ENABLED=true
+   BULLBOARD_PATH=/queues
+   ```
+
+   Замініть `WEBHOOK_UNIQUE_URL` на вашу унікальну URL вебхуку з [webhook.site](https://webhook.site/).
+
+4. **Запустіть сервіс**:
+   ```sh
+   pnpm run dev
+   ```
+   Сервіс буде доступний за адресою http://localhost:3001.
+
+## Використання
+
+Сервіс працює в фоновому режимі, обробляючи події з RabbitMQ та плануючи сповіщення через BullMQ. Для моніторингу черг завдань використовуйте BullBoard за адресою [http://localhost:3001/queues](http://localhost:3001/queues).
+
+### Моніторинг черг
+
+- Відкрийте [http://localhost:3001/queues](http://localhost:3001/queues) у браузері.
+- Переглядайте відкладені, активні та завершені завдання в BullMQ.
+- Перевірте, чи відправляються вебхуки на [webhook.site](https://webhook.site/).
+
+## Інтеграція з Docker
+
+`notification-service` розроблено для роботи в межах Docker Compose, визначеного в корені монорепозиторію. Переконайтеся, що наступні сервіси запущені через `docker-compose.yml` у кореневій директорії:
+
+- Redis
+- RabbitMQ
+
+Запустіть інфраструктуру з кореня проєкту:
+
+```sh
+docker-compose up -d
 ```
 
-## Running the app
+## Вирішення проблем
 
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- **Проблеми з підключенням до RabbitMQ**: Перевірте, чи `RABBITMQ_URL` правильний і RabbitMQ запущений.
+- **Проблеми з підключенням до Redis**: Переконайтеся, що Redis запущений і доступний.
+- **Проблеми з вебхуком**: Перевірте, чи `WEBHOOK_UNIQUE_URL` правильно встановлений і вебхук-сервіс активний.
