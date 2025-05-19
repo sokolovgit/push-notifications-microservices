@@ -1,5 +1,5 @@
 import { RABBITMQ_SERVICE } from "@/rabbitmq/rabbitmq.module"
-import { Inject, Injectable, Logger } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { ClientProxy } from "@nestjs/microservices"
 import { UserEvents } from "./users.events-definition"
 
